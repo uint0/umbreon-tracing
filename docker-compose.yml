@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+    - 9411:9411
+  redis:
+    image: redis
+  umbreon:
+    build: umbreon
+    depends_on:
+    - redis
+    - zipkin
+    environment:
+    - REDIS_URL=redis://redis:6379
+    ports:
+    - 6969:80
+  gateway:
+    build: gateway
+    depends_on:
+    - umbreon
+    - zipkin
+    ports:
+    - 8080:80
+  operator-flow--brock-dev:
+    build: operator-flow
+    depends_on:
+    - umbreon
+    - zipkin
+    environment:
+    - UMBREON_HOST=umbreon
+    - UMBREON_PLATFORM_INSTANCE=brock
+    - UMBREON_USER_ENVIRONMENT=dev
+  # operator-database:
+  #   image: ...
+  # saat:
+  #   image: ...
